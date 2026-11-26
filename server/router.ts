@@ -5,7 +5,7 @@ import { tasks } from "./store";
 import { publicProcedure, router } from "./trpc";
 import type { Task } from "./types";
 
-// paginacao por offset, simples e suficiente pra uma lista em memoria
+// offset pagination, simple and enough for an in memory list
 const listInput = z.object({
     cursor: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(50).default(10),
@@ -16,7 +16,7 @@ const taskInput = z.object({
     description: z.string().trim().optional(),
 });
 
-// byId, update e delete usam essa, entao o erro de tarefa q nao existe fica num lugar so
+// byId, update and delete use this one, so the not found error lives in one place
 function findTask(id: string): Task {
     const task = tasks.find((item) => item.id === id);
 

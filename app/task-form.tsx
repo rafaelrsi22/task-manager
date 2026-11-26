@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { Task } from "@/server/types";
 import { useTRPC } from "@/trpc/client";
 
-// o mesmo form serve pra criar e editar, se vier task eh edicao
+// same form for create and edit, if a task comes in it's an edit
 export function TaskForm({ task }: { task?: Task }) {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
@@ -33,7 +33,7 @@ export function TaskForm({ task }: { task?: Task }) {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        // valida no front pra nem chamar a api, o back valida de novo de qualquer jeito
+        // validate on the front so we don't even call the api, the back validates again anyway
         if (!title.trim()) {
             setError("Title is required");
             return;

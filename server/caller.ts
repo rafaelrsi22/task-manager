@@ -1,5 +1,5 @@
 import { appRouter } from "./router";
 import { createCallerFactory } from "./trpc";
 
-// chama o router direto no servidor, sem passar por http, eh o q as paginas usam no SSR
+// calls the router straight on the server without http, this is what the pages use for SSR
 export const caller = createCallerFactory(appRouter)({});

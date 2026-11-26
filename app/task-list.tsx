@@ -15,7 +15,7 @@ export function TaskList({ initialPage, saved }: { initialPage: Page; saved: boo
     const [message, setMessage] = useState<Message | null>(saved ? { type: "success", text: "Task saved" } : null);
     const loaderRef = useRef<HTMLParagraphElement>(null);
 
-    // a primeira pagina ja vem do servidor, as proximas o react query busca conforme rola
+    // the first page comes from the server, react query fetches the next ones on scroll
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(
         trpc.list.infiniteQueryOptions({}, {
             initialCursor: 0,
@@ -26,14 +26,14 @@ export function TaskList({ initialPage, saved }: { initialPage: Page; saved: boo
 
     const tasks = data.pages.flatMap((page) => page.items);
 
-    // tira o ?saved=1 da url pra mensagem nao aparecer de novo no F5
+    // remove ?saved=1 from the url so the message doesn't show again on refresh
     useEffect(() => {
         if (saved) {
             window.history.replaceState(null, "", "/");
         }
     }, [saved]);
 
-    // quando o "Loading more" aparece na tela busca a proxima pagina
+    // when "Loading more" shows up on screen fetch the next page
     useEffect(() => {
         const loader = loaderRef.current;
         if (!loader) return;
@@ -52,7 +52,7 @@ export function TaskList({ initialPage, saved }: { initialPage: Page; saved: boo
         trpc.delete.mutationOptions({
             onSuccess() {
                 setMessage({ type: "success", text: "Task deleted" });
-                // pathKey pq a chave da query infinita eh diferente da query normal
+                // pathKey because the infinite query key is different from the normal one
                 queryClient.invalidateQueries({ queryKey: trpc.list.pathKey() });
             },
             onError(error) {

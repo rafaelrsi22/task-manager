@@ -1,6 +1,6 @@
 import type { Task } from "./types";
 
-// no dev o next recarrega os modulos a cada save, entao a lista fica no globalThis pra nao zerar
+// in dev next reloads the modules on every save, so the list lives on globalThis to not reset
 const globalForTasks = globalThis as unknown as { tasks: Task[] | undefined };
 
 if (!globalForTasks.tasks) {
