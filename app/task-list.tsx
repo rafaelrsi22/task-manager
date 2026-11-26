@@ -8,10 +8,10 @@ import { useState } from "react";
 
 type Message = { type: "success" | "error"; text: string };
 
-export function TaskList({ initialTasks }: { initialTasks: Task[] }) {
+export function TaskList({ initialTasks, saved }: { initialTasks: Task[]; saved: boolean }) {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
-    const [message, setMessage] = useState<Message | null>(null);
+    const [message, setMessage] = useState<Message | null>(saved ? { type: "success", text: "Task saved" } : null);
 
     const { data: tasks } = useQuery(
         trpc.list.queryOptions(undefined, { initialData: initialTasks }),

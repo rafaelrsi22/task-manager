@@ -20,6 +20,10 @@ function findTask(id: string): Task {
     return task;
 }
 
+function getTask({ input }: { input: { id: string } }) {
+    return findTask(input.id);
+}
+
 function listTasks() {
     return tasks;
 }
@@ -54,6 +58,9 @@ function deleteTask({ input }: { input: { id: string } }) {
 export const appRouter = router({
     list: publicProcedure
         .query(listTasks),
+    byId: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .query(getTask),
     create: publicProcedure
         .input(taskInput)
         .mutation(createTask),
