@@ -5,11 +5,18 @@ import { tasks } from "./store";
 import { publicProcedure, router } from "./trpc";
 import type { Task } from "./types";
 
+// paginacao por offset, simples e suficiente pra uma lista em memoria
+const listInput = z.object({
+    cursor: z.number().int().min(0).default(0),
+    limit: z.number().int().min(1).max(50).default(10),
+});
+
 const taskInput = z.object({
     title: z.string().trim().min(1, "Title is required"),
     description: z.string().trim().optional(),
 });
 
+// byId, update e delete usam essa, entao o erro de tarefa q nao existe fica num lugar so
 function findTask(id: string): Task {
     const task = tasks.find((item) => item.id === id);
 
@@ -24,8 +31,13 @@ function getTask({ input }: { input: { id: string } }) {
     return findTask(input.id);
 }
 
-function listTasks() {
-    return tasks;
+function listTasks({ input }: { input: z.infer<typeof listInput> }) {
+    const end = input.cursor + input.limit;
+
+    return {
+        items: tasks.slice(input.cursor, end),
+        nextCursor: end < tasks.length ? end : null,
+    };
 }
 
 function createTask({ input }: { input: z.infer<typeof taskInput> }) {
@@ -57,6 +69,7 @@ function deleteTask({ input }: { input: { id: string } }) {
 
 export const appRouter = router({
     list: publicProcedure
+        .input(listInput)
         .query(listTasks),
     byId: publicProcedure
         .input(z.object({ id: z.string() }))

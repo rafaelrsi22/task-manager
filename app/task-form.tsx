@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Task } from "@/server/types";
 import { useTRPC } from "@/trpc/client";
 
+// o mesmo form serve pra criar e editar, se vier task eh edicao
 export function TaskForm({ task }: { task?: Task }) {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export function TaskForm({ task }: { task?: Task }) {
 
     const mutationOptions = {
         onSuccess() {
-            queryClient.invalidateQueries({ queryKey: trpc.list.queryKey() });
+            queryClient.invalidateQueries({ queryKey: trpc.list.pathKey() });
             router.push("/?saved=1");
         },
         onError(error: { message: string }) {
@@ -32,6 +33,7 @@ export function TaskForm({ task }: { task?: Task }) {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
+        // valida no front pra nem chamar a api, o back valida de novo de qualquer jeito
         if (!title.trim()) {
             setError("Title is required");
             return;

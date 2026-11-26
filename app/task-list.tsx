@@ -2,26 +2,58 @@
 
 import { Task } from "@/server/types";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Message = { type: "success" | "error"; text: string };
+type Page = { items: Task[]; nextCursor: number | null };
 
-export function TaskList({ initialTasks, saved }: { initialTasks: Task[]; saved: boolean }) {
+export function TaskList({ initialPage, saved }: { initialPage: Page; saved: boolean }) {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
     const [message, setMessage] = useState<Message | null>(saved ? { type: "success", text: "Task saved" } : null);
+    const loaderRef = useRef<HTMLParagraphElement>(null);
 
-    const { data: tasks } = useQuery(
-        trpc.list.queryOptions(undefined, { initialData: initialTasks }),
+    // a primeira pagina ja vem do servidor, as proximas o react query busca conforme rola
+    const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery(
+        trpc.list.infiniteQueryOptions({}, {
+            initialCursor: 0,
+            initialData: { pages: [initialPage], pageParams: [0] },
+            getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }),
     );
+
+    const tasks = data.pages.flatMap((page) => page.items);
+
+    // tira o ?saved=1 da url pra mensagem nao aparecer de novo no F5
+    useEffect(() => {
+        if (saved) {
+            window.history.replaceState(null, "", "/");
+        }
+    }, [saved]);
+
+    // quando o "Loading more" aparece na tela busca a proxima pagina
+    useEffect(() => {
+        const loader = loaderRef.current;
+        if (!loader) return;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        });
+
+        observer.observe(loader);
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     const deleteTask = useMutation(
         trpc.delete.mutationOptions({
             onSuccess() {
                 setMessage({ type: "success", text: "Task deleted" });
-                queryClient.invalidateQueries({ queryKey: trpc.list.queryKey() });
+                // pathKey pq a chave da query infinita eh diferente da query normal
+                queryClient.invalidateQueries({ queryKey: trpc.list.pathKey() });
             },
             onError(error) {
                 setMessage({ type: "error", text: error.message })
@@ -51,6 +83,8 @@ export function TaskList({ initialTasks, saved }: { initialTasks: Task[]; saved:
                     </li>
                 ))}
             </ul>
+
+            {hasNextPage && <p ref={loaderRef}>Loading more...</p>}
         </section>
     );
 }
