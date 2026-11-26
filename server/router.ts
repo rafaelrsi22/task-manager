@@ -14,7 +14,7 @@ function findTask(id: string): Task {
     const task = tasks.find((item) => item.id === id);
 
     if (!task) {
-        throw new TRPCError({code: "NOT_FOUND", message: "Task not found"});
+        throw new TRPCError({ code: "NOT_FOUND", message: "Task not found" });
     }
 
     return task;
@@ -25,7 +25,7 @@ function listTasks() {
 }
 
 function createTask({ input }: { input: z.infer<typeof taskInput> }) {
-    const task: Task =  {
+    const task: Task = {
         id: randomUUID(),
         title: input.title,
         description: input.description,
@@ -36,7 +36,7 @@ function createTask({ input }: { input: z.infer<typeof taskInput> }) {
     return task;
 }
 
-function updateTask({ input }: { input: z.infer<typeof taskInput>  & {id: string}}) {
+function updateTask({ input }: { input: z.infer<typeof taskInput> & { id: string } }) {
     const task = findTask(input.id);
     task.title = input.title;
     task.description = input.description;
@@ -44,7 +44,7 @@ function updateTask({ input }: { input: z.infer<typeof taskInput>  & {id: string
     return task;
 }
 
-function deleteTask({ input }: { input:  { id: string } }) {
+function deleteTask({ input }: { input: { id: string } }) {
     const task = findTask(input.id);
     tasks.splice(tasks.indexOf(task), 1);
 
