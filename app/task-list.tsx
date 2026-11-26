@@ -78,13 +78,13 @@ export function TaskList({ initialPage, saved }: { initialPage: Page; saved: boo
                             onClick={() => deleteTask.mutate({ id: task.id })}
                             disabled={deleteTask.isPending}
                         >
-                            Delete
+                            {deleteTask.isPending && deleteTask.variables?.id === task.id ? "Deleting..." : "Delete"}
                         </button>
                     </li>
                 ))}
             </ul>
 
-            {hasNextPage && <p ref={loaderRef}>Loading more...</p>}
+            {hasNextPage && <p ref={loaderRef} className="loading">Loading more...</p>}
         </section>
     );
 }

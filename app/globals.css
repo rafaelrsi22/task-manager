@@ -70,15 +70,32 @@ button {
   cursor: pointer;
 }
 
+button:hover:not(:disabled) {
+  background: #eee;
+}
+
 button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
+.success,
+.error {
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
 .success {
-  color: green;
+  color: #1a7f37;
+  background: #e6f4ea;
 }
 
 .error {
-  color: red;
+  color: #c62828;
+  background: #fdecea;
+}
+
+.loading {
+  color: #888;
+  text-align: center;
 }
